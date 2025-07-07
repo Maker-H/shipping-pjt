@@ -2,9 +2,13 @@ package io.hhplus.tdd.mvc;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Comparator;
+import java.util.List;
 
 import static io.hhplus.tdd.point.TransactionType.CHARGE;
 import static io.hhplus.tdd.point.TransactionType.USE;
@@ -31,6 +35,13 @@ public class PointServiceBasicImpl implements PointService {
     }
 
     @Override
+    public List<PointHistory> history(long id) {
+        List<PointHistory> pointHistories = pointHistoryTable.selectAllByUserId(id);
+        //TODO: 정렬의 경우 어떻게 처리해야하는지 질문
+        return pointHistories;
+    }
+
+    @Override
     public UserPoint use(long id, long amount) {
         UserPoint existing = userPointTable.selectById(id);
         long totalPoint = existing.use(amount).point();
@@ -38,4 +49,6 @@ public class PointServiceBasicImpl implements PointService {
         pointHistoryTable.insert(id, amount, USE, System.currentTimeMillis());
         return userPointTable.insertOrUpdate(id, totalPoint);
     }
+
+
 }

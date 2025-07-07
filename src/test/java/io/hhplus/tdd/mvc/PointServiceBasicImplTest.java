@@ -175,6 +175,87 @@ class PointServiceBasicImplTest {
         assertThrows(PointException.class, () -> pointController.use(userId, useAmount));
     }
 
+    @Test
+    void 히스토리가_없는_유저는_빈히스토리_반환() {
+        List<PointHistory> histories = pointController.history(1L);
+        assertThat(histories).isEmpty();
+    }
+
+    @Test
+    void 히스토리가_정상적으로_모두_쌓일_경우() {
+        long userId = 1L;
+        long chargeAmount = 1_000L;
+        long useAmount = 1_000L;
+
+        long beforeCharge = System.currentTimeMillis();
+        pointController.charge(userId, chargeAmount);
+        long afterCharge = System.currentTimeMillis();
+
+        long beforeUse = System.currentTimeMillis();
+        pointController.use(userId, useAmount);
+        long afterUse = System.currentTimeMillis();
+
+        List<PointHistory> histories = pointController.history(userId);
+        assertThat(histories).hasSize(2);
+
+        PointHistory firstHistory = histories.get(0);
+        PointHistory secondHistory = histories.get(1);
+        assertAll(
+                () -> assertEquals(chargeAmount, firstHistory.amount()),
+                () -> assertEquals(TransactionType.CHARGE, firstHistory.type()),
+                () -> assertEquals(userId, firstHistory.userId()),
+                () -> assertThat(firstHistory.updateMillis()).isBetween(beforeCharge, afterCharge)
+        );
+
+        assertAll(
+                () -> assertEquals(useAmount, secondHistory.amount()),
+                () -> assertEquals(TransactionType.USE, secondHistory.type()),
+                () -> assertEquals(userId, secondHistory.userId()),
+                () -> assertThat(secondHistory.updateMillis()).isBetween(beforeUse, afterUse)
+        );
+    }
+
+    @Test
+    void 포인트_잔액부족시_성공내역만_히스토리에_남는다() {
+        long userId = 1L;
+        long chargeAmount = 1_000L;
+        long useAmount = 1_001L;
+
+        long beforeCharge = System.currentTimeMillis();
+        pointController.charge(userId, chargeAmount);
+        long afterCharge = System.currentTimeMillis();
+
+        PointException pointException = assertThrows(PointException.class, () -> pointController.use(userId, useAmount));
+        assertThat(pointException.getMessage()).contains("잔고가 부족");
+        List<PointHistory> histories = pointController.history(userId);
+        assertThat(histories).hasSize(1);
+
+        PointHistory firstHistory = histories.get(0);
+        assertAll(
+                () -> assertEquals(chargeAmount, firstHistory.amount()),
+                () -> assertEquals(TransactionType.CHARGE, firstHistory.type()),
+                () -> assertEquals(userId, firstHistory.userId()),
+                () -> assertThat(firstHistory.updateMillis()).isBetween(beforeCharge, afterCharge)
+        );
+    }
+
+//
+//    @Test
+//    void 히스토리는_updateTime_기준으로_오름차순_정렬되었다() throws InterruptedException {
+//        long userId = 1L;
+//
+//        pointController.charge(userId, 1_000L);
+//        pointController.use(userId, 200L);
+//        pointController.use(userId, 300L);
+//
+//        List<PointHistory> histories = pointController.history(userId);
+//
+//        assertThat(histories).hasSize(3);
+//        assertThat(histories)
+//                .extracting(PointHistory::updateMillis)
+//                .isSorted();
+//    }
+
     @TestConfiguration
     static class OverrideConfig {
 
