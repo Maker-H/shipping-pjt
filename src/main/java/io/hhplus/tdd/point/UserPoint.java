@@ -17,7 +17,7 @@ public record UserPoint(
         return new UserPoint(id, point + amount, System.currentTimeMillis());
     }
 
-    public UserPoint minus(long amount) {
+    public UserPoint use(long amount) {
         if (amount <= 0) {
             throw new PointException("포인트 사용 금액은 0보다 커야 합니다");
         }

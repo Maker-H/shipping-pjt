@@ -1,8 +1,5 @@
 package io.hhplus.tdd.point;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,14 +28,14 @@ class UserPointTest {
         );
     }
 
-    static Stream<Arguments> minusSuccessCases() {
+    static Stream<Arguments> useSuccessCases() {
         return Stream.of(
                 Arguments.of(new UserPoint(1L, 100L, 0), 10),
                 Arguments.of(new UserPoint(1L, 500L, 0), 10)
         );
     }
 
-    static Stream<Arguments> minusFailCases() {
+    static Stream<Arguments> useFailCases() {
         return Stream.of(
                 Arguments.of(new UserPoint(1L, 0, 0), 0),
                 Arguments.of(new UserPoint(1L, 50, 0), -51)
@@ -67,11 +64,11 @@ class UserPointTest {
     }
 
     @ParameterizedTest(name = "포인트 차감 성공 케이스")
-    @MethodSource("minusSuccessCases")
-    void minus_success(UserPoint userPoint, long minusAmount) {
+    @MethodSource("useSuccessCases")
+    void use_success(UserPoint userPoint, long minusAmount) {
         long prevAmount = userPoint.point();
 
-        UserPoint result = userPoint.minus(minusAmount);
+        UserPoint result = userPoint.use(minusAmount);
 
         assertAll(
                 () -> assertEquals(prevAmount - minusAmount, result.point()),
@@ -80,10 +77,10 @@ class UserPointTest {
     }
 
     @ParameterizedTest(name = "포인트가 부족하여 차감 실패하는 케이스")
-    @MethodSource("minusFailCases")
-    void minus_fail(UserPoint userPoint) {
+    @MethodSource("useFailCases")
+    void use_fail(UserPoint userPoint) {
         long minusAmount = 100L;
-        assertThrows(PointException.class, () -> userPoint.minus(minusAmount));
+        assertThrows(PointException.class, () -> userPoint.use(minusAmount));
     }
 
 
