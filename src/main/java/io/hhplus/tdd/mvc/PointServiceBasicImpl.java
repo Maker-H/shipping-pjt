@@ -2,14 +2,12 @@ package io.hhplus.tdd.mvc;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
-import io.hhplus.tdd.point.PointException;
-import io.hhplus.tdd.point.PointHistory;
-import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import static io.hhplus.tdd.point.TransactionType.CHARGE;
+import static io.hhplus.tdd.point.TransactionType.USE;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +18,6 @@ public class PointServiceBasicImpl implements PointService {
 
     @Override
     public UserPoint charge(long id, long amount) {
-
         UserPoint existing = userPointTable.selectById(id);
         long totalPoint = existing.add(amount).point();
 
@@ -31,5 +28,14 @@ public class PointServiceBasicImpl implements PointService {
     @Override
     public UserPoint get(long id) {
         return userPointTable.selectById(id);
+    }
+
+    @Override
+    public UserPoint use(long id, long amount) {
+        UserPoint existing = userPointTable.selectById(id);
+        long totalPoint = existing.use(amount).point();
+
+        pointHistoryTable.insert(id, amount, USE, System.currentTimeMillis());
+        return userPointTable.insertOrUpdate(id, totalPoint);
     }
 }

@@ -7,4 +7,6 @@ public interface PointService {
     UserPoint charge(long id, long amount);
 
     UserPoint get(long id);
+
+    UserPoint use(long id, long amount);
 }
