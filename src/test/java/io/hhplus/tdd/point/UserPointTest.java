@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserPointTest {
@@ -46,15 +47,15 @@ class UserPointTest {
     @MethodSource("addSuccessCases")
     void charge_sucess(UserPoint userPoint, long addAmount) {
         long prevAmount = userPoint.point();
-        UserPoint result = userPoint.add(addAmount);
 
+        long before = System.currentTimeMillis();
+        UserPoint result = userPoint.add(addAmount);
+        long after = System.currentTimeMillis();
         assertAll(
                 () -> assertEquals(prevAmount + addAmount, result.point()),
-                () -> assertTrue(
-                        result.updateMillis() > userPoint.updateMillis(),
-                        "업데이트 시간이 갱신되어야 한다"
-                )
+                () -> assertThat(result.updateMillis()).isBetween(before, after)
         );
+
     }
 
     @ParameterizedTest(name = "충전 포인트가 0 이하인 경우")
@@ -68,11 +69,13 @@ class UserPointTest {
     void use_success(UserPoint userPoint, long minusAmount) {
         long prevAmount = userPoint.point();
 
+        long before = System.currentTimeMillis();
         UserPoint result = userPoint.use(minusAmount);
+        long after = System.currentTimeMillis();
 
         assertAll(
                 () -> assertEquals(prevAmount - minusAmount, result.point()),
-                () -> assertTrue(result.updateMillis() > userPoint.updateMillis())
+                () -> assertThat(result.updateMillis()).isBetween(before, after)
         );
     }
 

@@ -107,9 +107,10 @@ class PointServiceBasicImplTest {
     void 충전_성공_테스트(long userId, long initialAmount, long chargeAmount) {
 
         pointTable.insertOrUpdate(userId, initialAmount);
-        long now = System.currentTimeMillis();
 
+        long before = System.currentTimeMillis();
         UserPoint result = pointController.charge(userId, chargeAmount);
+        long after = System.currentTimeMillis();
 
         assertThat(result.point()).isEqualTo(initialAmount + chargeAmount);
 
@@ -124,7 +125,7 @@ class PointServiceBasicImplTest {
                 () -> assertEquals(userId, pointHistory.userId()),
                 () -> assertEquals(chargeAmount, pointHistory.amount()),
                 () -> assertEquals(TransactionType.CHARGE, pointHistory.type()),
-                () -> assertThat(pointHistory.updateMillis()).isBetween(now - 1000, now + 1000)
+                () -> assertThat(pointHistory.updateMillis()).isBetween(before, after)
         );
     }
 
@@ -143,9 +144,10 @@ class PointServiceBasicImplTest {
     void 사용_성공_테스트(long userId, long initialAmount, long useAmount) {
 
         pointTable.insertOrUpdate(userId, initialAmount);
-        long now = System.currentTimeMillis();
 
+        long before = System.currentTimeMillis();
         UserPoint result = pointController.use(userId, useAmount);
+        long after = System.currentTimeMillis();
 
         assertThat(result.point()).isEqualTo(initialAmount - useAmount);
 
@@ -160,7 +162,7 @@ class PointServiceBasicImplTest {
                 () -> assertEquals(userId, pointHistory.userId()),
                 () -> assertEquals(useAmount, pointHistory.amount()),
                 () -> assertEquals(TransactionType.USE, pointHistory.type()),
-                () -> assertThat(pointHistory.updateMillis()).isBetween(now - 1000, now + 1000)
+                () -> assertThat(pointHistory.updateMillis()).isBetween(before, after)
         );
     }
 
