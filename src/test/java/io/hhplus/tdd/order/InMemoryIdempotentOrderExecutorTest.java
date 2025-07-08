@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,7 +106,7 @@ class InMemoryIdempotentOrderExecutorTest {
             try {
                 latch.await();
                 return indempotentExecutor.executeWithLock(order, supplier);
-            } catch (AlreadyProcessedOrderException e) {
+            } catch (OrderException e) {
                 return e;
             }
         };
@@ -121,7 +120,7 @@ class InMemoryIdempotentOrderExecutorTest {
 
         for (Future<Object> future : futures) {
             Object result = future.get();
-            if (result instanceof AlreadyProcessedOrderException) {
+            if (result instanceof OrderException) {
                 ACTUAL_FAIL.incrementAndGet();
             } else {
                 ACTUAL_SUCCESS.incrementAndGet();

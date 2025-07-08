@@ -1,21 +1,18 @@
-package io.hhplus.tdd.point;
+package io.hhplus.tdd.order;
 
-import io.hhplus.tdd.order.OrderException;
+public class OrderException extends RuntimeException {
 
-public class PointException extends RuntimeException{
-
-    public PointException(Throwable cause) {
+    public OrderException(Throwable cause) {
         super(cause);
     }
 
-    public PointException(Message message) {
+
+    public OrderException(Message message) {
         super(message.name());
     }
 
     public enum Message {
-        CHARGE_AMOUNT_TOO_LOW,
-        USE_AMOUNT_TOO_LOW,
-        USE_AMOUNT_TOO_MUCH;
+        ALREADY_ORDERED,;
 
         public static Message fromString (String value) {
             for (Message message : values()) {
@@ -26,6 +23,4 @@ public class PointException extends RuntimeException{
             throw new IllegalArgumentException("No enum constant " + value);
         }
     }
-
-
 }

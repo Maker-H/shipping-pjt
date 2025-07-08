@@ -7,6 +7,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import static io.hhplus.tdd.order.OrderException.*;
+import static io.hhplus.tdd.order.OrderException.Message.*;
+
 @Component
 public class InMemoryIdempotentOrderExecutor implements IdempotentOrderExecutor {
 
@@ -23,7 +26,7 @@ public class InMemoryIdempotentOrderExecutor implements IdempotentOrderExecutor 
             if (acquired) {
                 return task.get();
             } else {
-                throw new AlreadyProcessedOrderException("같은 주문이 들어왔습니다");
+                throw new OrderException(ALREADY_ORDERED);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
