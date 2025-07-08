@@ -7,7 +7,6 @@ import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
 import static io.hhplus.tdd.point.TransactionType.CHARGE;
@@ -15,7 +14,7 @@ import static io.hhplus.tdd.point.TransactionType.USE;
 
 @Service
 @RequiredArgsConstructor
-public class PointServiceBasicImpl implements PointService {
+public class BasicPointService implements PointService {
 
     private final PointHistoryTable pointHistoryTable;
     private final UserPointTable userPointTable;
@@ -37,7 +36,6 @@ public class PointServiceBasicImpl implements PointService {
     @Override
     public List<PointHistory> history(long id) {
         List<PointHistory> pointHistories = pointHistoryTable.selectAllByUserId(id);
-        //TODO: 정렬의 경우 어떻게 처리해야하는지 질문
         return pointHistories;
     }
 

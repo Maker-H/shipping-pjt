@@ -6,7 +6,6 @@ import io.hhplus.tdd.point.PointException;
 import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,11 +30,11 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-        PointServiceBasicImplTest.OverrideConfig.class,
+        BasicPointServiceTest.OverrideConfig.class,
         MvcTestConfig.class
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class PointServiceBasicImplTest {
+class BasicPointServiceTest {
 
     @Autowired
     private PointController pointController;
@@ -268,7 +267,7 @@ class PointServiceBasicImplTest {
         @Bean
         @Primary
         public PointService pointService() {
-            return new PointServiceBasicImpl(pointHistoryTable, userPointTable);
+            return new BasicPointService(pointHistoryTable, userPointTable);
         }
 
     }
