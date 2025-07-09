@@ -1,6 +1,6 @@
 package io.hhplus.tdd;
 
-import io.hhplus.tdd.order.AlreadyProcessedOrderException;
+import io.hhplus.tdd.order.OrderException;
 import io.hhplus.tdd.point.PointException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +16,15 @@ class ApiControllerAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = PointException.class)
-    public ResponseEntity<ErrorResponse> handleException(PointException e) {
-        return ResponseEntity.status(406).body(new ErrorResponse("406", e.getMessage()));
+    public ResponseEntity<ErrorResponse> handlePointException(PointException e) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(new ErrorResponse(status.value() + "", e.getMessage()));
     }
 
-    @ExceptionHandler(value = AlreadyProcessedOrderException.class)
-    public ResponseEntity<ErrorResponse> handleException(AlreadyProcessedOrderException e) {
-        return ResponseEntity.status(409).body(new ErrorResponse("406", e.getMessage()));
+    @ExceptionHandler(value = OrderException.class)
+    public ResponseEntity<ErrorResponse> handleOrderException(OrderException e) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        return ResponseEntity.status(status).body(new ErrorResponse(status.value() + "", e.getMessage()));
     }
+
 }

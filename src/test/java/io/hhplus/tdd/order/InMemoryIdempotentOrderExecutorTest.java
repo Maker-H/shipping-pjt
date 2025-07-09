@@ -15,13 +15,13 @@ class InMemoryIdempotentOrderExecutorTest {
 
     private InMemoryIdempotentOrderExecutor indempotentExecutor;
     private ExecutorService threadPool;
-    private UserOrder order;
+    private PointOrder order;
 
     @BeforeEach
     void beforeEach() {
-        indempotentExecutor = new InMemoryIdempotentOrderExecutor();
+        indempotentExecutor = new InMemoryIdempotentOrderExecutor(1, TimeUnit.SECONDS);
         threadPool = Executors.newFixedThreadPool(50);
-        order = UserOrder.empty(1L);
+        order = PointOrder.empty(1L);
     }
 
     @AfterEach
@@ -34,27 +34,27 @@ class InMemoryIdempotentOrderExecutorTest {
 
         AtomicInteger CALL_COUNT = new AtomicInteger(0);
 
-        TimeUnit waitUnit = indempotentExecutor.getWAIT_UNIT();
-        long waitSeconds = indempotentExecutor.getWAIT_SECONDS();
+        TimeUnit waitUnit = indempotentExecutor.getWaitUnit();
+        long waitSeconds = indempotentExecutor.getWaitSeconds();
 
         CountDownLatch latch = new CountDownLatch(1);
 
-        Supplier<UserOrder> supplier = () -> {
+        Supplier<PointOrder> supplier = () -> {
             CALL_COUNT.incrementAndGet();
             threadSleep(waitUnit, waitSeconds);
             return order;
         };
 
-        Callable<UserOrder> taskLogic = () -> {
+        Callable<PointOrder> taskLogic = () -> {
             latch.await();
             return indempotentExecutor.executeWithLock(order, supplier);
         };
 
-        List<Callable<UserOrder>> callables = createConcurrentTasks(10, taskLogic);
-        List<Future<UserOrder>> futures = submitCallable(callables);
+        List<Callable<PointOrder>> callables = createConcurrentTasks(10, taskLogic);
+        List<Future<PointOrder>> futures = submitCallable(callables);
         latch.countDown();
 
-        for (Future<UserOrder> future : futures) {
+        for (Future<PointOrder> future : futures) {
             try {
                 future.get();
             } catch (Exception e) {
@@ -69,18 +69,18 @@ class InMemoryIdempotentOrderExecutorTest {
     void TTL_보장_확인() {
         AtomicInteger CALL_COUNT = new AtomicInteger(0);
 
-        Supplier<UserOrder> supplier = () -> {
+        Supplier<PointOrder> supplier = () -> {
             CALL_COUNT.incrementAndGet();
             return order;
         };
 
-        UserOrder first = indempotentExecutor.executeWithLock(order, supplier);
+        PointOrder first = indempotentExecutor.executeWithLock(order, supplier);
 
-        TimeUnit waitUnit = indempotentExecutor.getWAIT_UNIT();
-        long waitSeconds = indempotentExecutor.getWAIT_SECONDS();
+        TimeUnit waitUnit = indempotentExecutor.getWaitUnit();
+        long waitSeconds = indempotentExecutor.getWaitSeconds();
         threadSleep(waitUnit, waitSeconds);
 
-        UserOrder second = indempotentExecutor.executeWithLock(order, supplier);
+        PointOrder second = indempotentExecutor.executeWithLock(order, supplier);
 
         assertEquals(2, CALL_COUNT.get(), "TTL 만료 후 supplier가 다시 실행돼야 함");
     }
@@ -92,12 +92,12 @@ class InMemoryIdempotentOrderExecutorTest {
         int EXPECTED_FAIL = 9;
         int totalThreadCount = EXPECTED_FAIL + EXPECTED_SUCCESS;
 
-        TimeUnit waitUnit = indempotentExecutor.getWAIT_UNIT();
-        long waitSeconds = indempotentExecutor.getWAIT_SECONDS();
+        TimeUnit waitUnit = indempotentExecutor.getWaitUnit();
+        long waitSeconds = indempotentExecutor.getWaitSeconds();
 
         CountDownLatch latch = new CountDownLatch(1);
 
-        Supplier<UserOrder> supplier = () -> {
+        Supplier<PointOrder> supplier = () -> {
             threadSleep(waitUnit, waitSeconds);
             return order;
         };

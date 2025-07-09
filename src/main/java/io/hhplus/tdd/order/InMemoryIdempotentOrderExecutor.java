@@ -7,22 +7,33 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import static io.hhplus.tdd.order.OrderException.*;
 import static io.hhplus.tdd.order.OrderException.Message.*;
 
 @Component
 public class InMemoryIdempotentOrderExecutor implements IdempotentOrderExecutor {
 
-    private final ConcurrentHashMap<UserOrder, ReentrantLock> lockMap = new ConcurrentHashMap<>();
+    private static final int DEFAULT_WAIT_SECONDS = 5;
+    private static final TimeUnit DEFAULT_WAIT_UNIT = TimeUnit.SECONDS;
 
-    private final int WAIT_SECONDS = 5;
-    private final TimeUnit WAIT_UNIT = TimeUnit.SECONDS;
+    private final ConcurrentHashMap<PointOrder, ReentrantLock> lockMap = new ConcurrentHashMap<>();
 
-    public <T> T executeWithLock (UserOrder orderKey, Supplier<T> task) {
+    private final int waitSeconds;
+    private final TimeUnit waitUnit;
+
+    public InMemoryIdempotentOrderExecutor() {
+        this(DEFAULT_WAIT_SECONDS, DEFAULT_WAIT_UNIT);
+    }
+
+    public InMemoryIdempotentOrderExecutor(int waitSeconds, TimeUnit waitUnit) {
+        this.waitSeconds = waitSeconds;
+        this.waitUnit = waitUnit;
+    }
+
+    public <T> T executeWithLock (PointOrder orderKey, Supplier<T> task) {
         ReentrantLock lock = lockMap.computeIfAbsent(orderKey, key -> new ReentrantLock());
         boolean acquired = false;
         try {
-            acquired = lock.tryLock(WAIT_SECONDS, WAIT_UNIT);
+            acquired = lock.tryLock(waitSeconds, waitUnit);
             if (acquired) {
                 return task.get();
             } else {
@@ -39,11 +50,11 @@ public class InMemoryIdempotentOrderExecutor implements IdempotentOrderExecutor 
         }
     }
 
-    public int getWAIT_SECONDS() {
-        return WAIT_SECONDS;
+    public int getWaitSeconds() {
+        return waitSeconds;
     }
 
-    public TimeUnit getWAIT_UNIT() {
-        return WAIT_UNIT;
+    public TimeUnit getWaitUnit() {
+        return waitUnit;
     }
 }

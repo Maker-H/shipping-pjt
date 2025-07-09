@@ -12,7 +12,6 @@ import java.util.List;
 import static io.hhplus.tdd.point.TransactionType.CHARGE;
 import static io.hhplus.tdd.point.TransactionType.USE;
 
-@Service
 @RequiredArgsConstructor
 public class BasicPointService implements PointService {
 
