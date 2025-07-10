@@ -1,0 +1,37 @@
+[
+  {
+    "key": "charge_success",
+    "queriesDescription": { "userId": "사용자id" },
+    "queries": { "userId": 1 },
+    "bodyDescription": {
+      "accountNo": "계좌",
+      "amount": "포인트"
+    },
+    "body": {
+      "accountNo": "1",
+      "amount": 0
+    },
+    "response": {
+      "code": 200,
+      "message": "홍길동sucess"
+    }
+  },
+
+  {
+    "key": "charge_fail_invalid_amount",
+    "queriesDescription": { "userId": "사용자id" },
+    "bodyDescription": {
+      "accountNo": "계좌",
+      "amount": "포인트"
+    },
+    "queries": { "userId": 2 },
+    "body": {
+      "accountNo": "1234567890",
+      "amount": 10000
+    },
+    "response": {
+      "code": 500,
+      "message": "홍길동fail"
+    }
+  }
+]

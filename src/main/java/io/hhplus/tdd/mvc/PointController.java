@@ -5,9 +5,12 @@ import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/point")
@@ -50,4 +53,30 @@ public class PointController {
     ) {
         return pointService.use(id, amount);
     }
+
+    @PostMapping("check-amount")
+    public ResponseEntity<Map<String, Object>> charge(
+            @RequestParam Long userId,
+            @RequestBody ChargeRequest request
+    ) {
+        // 유효하지 않은 금액 처리 (ex. 10,000 이상이면 실패)
+        if (request.amount() >= 10000) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of(
+                            "code", 500,
+                            "message", "홍길동fail"
+                    )
+            );
+        }
+
+        // 성공 응답 예시 (실제로는 비즈니스 로직 처리 필요)
+        return ResponseEntity.ok(
+                Map.of(
+                        "code", 200,
+                        "message", "홍길동success"
+                )
+        );
+    }
+
+    public record ChargeRequest(String accountNo, int amount) {}
 }
