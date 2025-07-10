@@ -1,31 +1,50 @@
 package io.hhplus.tdd.point;
 
-import io.hhplus.tdd.order.OrderException;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
-public class PointException extends RuntimeException{
+public class PointException extends RuntimeException {
 
-    public PointException(Throwable cause) {
-        super(cause);
+    private final PointErrorType errorCode;
+
+    public PointException(PointErrorType errorType) {
+        super(errorType.getLog());
+        this.errorCode = errorType;
     }
 
-    public PointException(Message message) {
-        super(message.name());
+    public HttpStatus getHttpStatus() {
+        return errorCode.getHttpStatus();
     }
 
-    public enum Message {
-        CHARGE_AMOUNT_TOO_LOW,
-        USE_AMOUNT_TOO_LOW,
-        USE_AMOUNT_TOO_MUCH;
+    public String getHttpStatusValue() {
+        return errorCode.getHttpStatus().value() + "";
+    }
 
-        public static Message fromString (String value) {
-            for (Message message : values()) {
-                if (message.name().equals(value)) {
-                    return message;
-                }
-            }
-            throw new IllegalArgumentException("No enum constant " + value);
+
+    public String getErrorName() {
+        return errorCode.name();
+    }
+
+    public String getLog() {
+        return errorCode.getLog();
+    }
+
+
+    public enum PointErrorType {
+        CHARGE_AMOUNT_TOO_LOW(HttpStatus.BAD_REQUEST, "충전 금액은 0보다 커야 합니다."),
+        USE_AMOUNT_TOO_LOW(HttpStatus.BAD_REQUEST, "사용 금액은 0보다 커야 합니다."),
+        USE_AMOUNT_TOO_MUCH(HttpStatus.BAD_REQUEST, "사용 금액이 잔액을 초과했습니다.");
+
+        @Getter
+        private final HttpStatus httpStatus;
+
+        @Getter
+        private final String log;
+
+        PointErrorType(HttpStatus status, String log) {
+            this.httpStatus = status;
+            this.log = log;
         }
+
     }
-
-
 }

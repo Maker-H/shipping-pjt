@@ -15,13 +15,13 @@ class InMemoryIdempotentOrderExecutorTest {
 
     private InMemoryIdempotentOrderExecutor indempotentExecutor;
     private ExecutorService threadPool;
-    private PointOrder order;
+    private PointOrder firstOrder;
 
     @BeforeEach
     void beforeEach() {
         indempotentExecutor = new InMemoryIdempotentOrderExecutor(1, TimeUnit.SECONDS);
         threadPool = Executors.newFixedThreadPool(50);
-        order = PointOrder.empty(1L);
+        firstOrder = PointOrder.empty(1L);
     }
 
     @AfterEach
@@ -42,12 +42,12 @@ class InMemoryIdempotentOrderExecutorTest {
         Supplier<PointOrder> supplier = () -> {
             CALL_COUNT.incrementAndGet();
             threadSleep(waitUnit, waitSeconds);
-            return order;
+            return firstOrder;
         };
 
         Callable<PointOrder> taskLogic = () -> {
             latch.await();
-            return indempotentExecutor.executeWithLock(order, supplier);
+            return indempotentExecutor.executeWithLock(firstOrder, supplier);
         };
 
         List<Callable<PointOrder>> callables = createConcurrentTasks(10, taskLogic);
@@ -69,20 +69,42 @@ class InMemoryIdempotentOrderExecutorTest {
     void TTL_보장_확인() {
         AtomicInteger CALL_COUNT = new AtomicInteger(0);
 
-        Supplier<PointOrder> supplier = () -> {
-            CALL_COUNT.incrementAndGet();
-            return order;
-        };
-
-        PointOrder first = indempotentExecutor.executeWithLock(order, supplier);
+        indempotentExecutor.executeWithLock(
+                this.firstOrder,
+                () -> {
+                    CALL_COUNT.incrementAndGet();
+                    return firstOrder;
+                }
+        );
 
         TimeUnit waitUnit = indempotentExecutor.getWaitUnit();
         long waitSeconds = indempotentExecutor.getWaitSeconds();
         threadSleep(waitUnit, waitSeconds);
 
-        PointOrder second = indempotentExecutor.executeWithLock(order, supplier);
+        PointOrder secondOrder = PointOrder.empty(1L);
+
+        indempotentExecutor.executeWithLock(
+                secondOrder,
+                () -> {
+                    CALL_COUNT.incrementAndGet();
+                    return secondOrder;
+                }
+        );
 
         assertEquals(2, CALL_COUNT.get(), "TTL 만료 후 supplier가 다시 실행돼야 함");
+    }
+
+    @Test
+    void  시간내_중복_주문시_예외() {
+        indempotentExecutor.executeWithLock(this.firstOrder, () -> firstOrder);
+
+        PointOrder secondOrder = PointOrder.empty(1L);
+        System.out.println("hash: " + firstOrder.toKey().hashCode() + " vs " + secondOrder.toKey().hashCode());
+        Assertions.assertThrows(
+                OrderException.class,
+                () -> indempotentExecutor.executeWithLock(secondOrder, () -> secondOrder)
+        );
+
     }
 
     @Test
@@ -99,13 +121,13 @@ class InMemoryIdempotentOrderExecutorTest {
 
         Supplier<PointOrder> supplier = () -> {
             threadSleep(waitUnit, waitSeconds);
-            return order;
+            return firstOrder;
         };
 
         Callable<Object> taskLogic = () -> {
             try {
                 latch.await();
-                return indempotentExecutor.executeWithLock(order, supplier);
+                return indempotentExecutor.executeWithLock(firstOrder, supplier);
             } catch (OrderException e) {
                 return e;
             }

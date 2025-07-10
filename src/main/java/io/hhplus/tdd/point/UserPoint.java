@@ -1,6 +1,7 @@
 package io.hhplus.tdd.point;
 
-import io.hhplus.tdd.point.PointException.Message;
+
+import static io.hhplus.tdd.point.PointException.*;
 
 public record UserPoint(
         long id,
@@ -14,17 +15,17 @@ public record UserPoint(
 
     public UserPoint add(long amount) {
         if (amount <= 0) {
-            throw new PointException(Message.CHARGE_AMOUNT_TOO_LOW);
+            throw new PointException(PointErrorType.CHARGE_AMOUNT_TOO_LOW);
         }
         return new UserPoint(id, point + amount, System.currentTimeMillis());
     }
 
     public UserPoint use(long amount) {
         if (amount <= 0) {
-            throw new PointException(Message.USE_AMOUNT_TOO_LOW);
+            throw new PointException(PointErrorType.USE_AMOUNT_TOO_LOW);
         }
         if (point < amount) {
-            throw new PointException(Message.USE_AMOUNT_TOO_MUCH);
+            throw new PointException(PointErrorType.USE_AMOUNT_TOO_MUCH);
         }
         return new UserPoint(id, point - amount, System.currentTimeMillis());
     }

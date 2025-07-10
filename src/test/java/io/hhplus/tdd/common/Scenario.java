@@ -2,6 +2,7 @@ package io.hhplus.tdd.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import groovy.transform.ToString;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.restdocs.request.ParameterDescriptor;
@@ -19,8 +20,8 @@ public record Scenario(
     Map<String, String> bodyDescription,
     Map<String, Object> pathParams,
     Map<String, Object> queries,
-    Map<String, Object> body,
-    Map<String, Object> response
+    Map<String, Object> body
+//    Response response
 ) {
 
     public void validate(String resourceName) {
@@ -40,7 +41,8 @@ public record Scenario(
     }
 
     public Scenario toScenario() {
-        return new Scenario(key, tables, pathParamsDescription, queriesDescription, bodyDescription, pathParams, queries, body, response);
+        return new Scenario(key, tables, pathParamsDescription, queriesDescription, bodyDescription, pathParams, queries, body);
+//        return new Scenario(key, tables, pathParamsDescription, queriesDescription, bodyDescription, pathParams, queries, body, response);
     }
 
     public Snippet asPathSnippet() {
@@ -64,7 +66,7 @@ public record Scenario(
         return RequestDocumentation.queryParameters(queryDescription);
     }
 
-    public Snippet asRequestSnippet() {
+    public Snippet asBodySnippet() {
 
         List<FieldDescriptor> fieldDescriptors = bodyDescription
                 .entrySet()
@@ -75,13 +77,40 @@ public record Scenario(
         return PayloadDocumentation.requestFields(fieldDescriptors);
     }
 
+    public static class Response {
+
+        private final int code;
+        private final String message;
+
+        @JsonCreator
+        public Response(
+                @JsonProperty("code") int code,
+                @JsonProperty("message") String message
+        ) {
+            this.code = code;
+            this.message = message;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    @ToString
     public static class Table {
+
         private final String tableName;
         private final List<Map<String, Object>> rows;
 
         @JsonCreator
-        public Table(@JsonProperty("table") String tableName,
-                     @JsonProperty("rows") List<Map<String, Object>> rows) {
+        public Table(
+                @JsonProperty("table") String tableName,
+                @JsonProperty("rows") List<Map<String, Object>> rows
+        ) {
             this.tableName = tableName;
             this.rows = rows;
         }

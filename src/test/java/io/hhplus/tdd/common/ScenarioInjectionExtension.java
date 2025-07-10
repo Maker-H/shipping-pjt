@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.TransactionType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,7 +29,7 @@ import java.util.Map;
  * @see LoadScenarios
  * @see ScenarioKey
  */
-public class ScenarioInjectionExtension implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
+public class ScenarioInjectionExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private final Map<String, Scenario> scenarioMap = new HashMap<>();
@@ -117,20 +118,26 @@ public class ScenarioInjectionExtension implements BeforeAllCallback, BeforeEach
             List<Map<String, Object>> rows = table.getRows();
 
             if (tableName.equals("userPoints")) {
-                for (Map<String, Object> data : rows) {
-                    Long id = Long.parseLong(data.get("id").toString());
-                    Long amount = Long.parseLong(data.get("amount").toString());
-                    userPointTable.insertOrUpdate(id, amount);
+                for (Map<String, Object> row : rows) {
+                    Integer id = (Integer) row.get("id");
+                    Integer amount = (Integer) row.get("amount");
+                    userPointTable.insertOrUpdate(id.longValue(), amount.longValue());
                 }
             }
 
             if (tableName.equals("pointHistories")) {
-                for (Map<String, Object> data : rows) {
+                for (Map<String, Object> row : rows) {
+
+                    Integer id = (Integer) row.get("id");
+                    Integer value = (Integer) row.get("amount");
+                    TransactionType type = TransactionType.from((String) row.get("type"));
+                    Integer updateMillis = (Integer) row.get("updateMillis");
+
                     pointHistoryTable.insert(
-                            Long.parseLong(data.get("id").toString()),
-                            Long.parseLong(data.get("amount").toString()),
-                            TransactionType.from(data.get("type").toString()),
-                            Long.parseLong(data.get("updateMillis").toString())
+                            id.longValue(),
+                            value.longValue(),
+                            type,
+                            updateMillis.longValue()
                     );
                 }
             }
@@ -138,4 +145,14 @@ public class ScenarioInjectionExtension implements BeforeAllCallback, BeforeEach
 
     }
 
+    @Override
+    public void afterEach(ExtensionContext extensionContext) throws Exception {
+        ApplicationContext applicationContext = SpringExtension.getApplicationContext(extensionContext);
+
+        UserPointTable userPointTable = applicationContext.getBean(UserPointTable.class);
+        PointHistoryTable pointHistoryTable = applicationContext.getBean(PointHistoryTable.class);
+
+        userPointTable.clear();
+        pointHistoryTable.clear();
+    }
 }

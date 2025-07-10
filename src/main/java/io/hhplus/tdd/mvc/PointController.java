@@ -1,16 +1,18 @@
 package io.hhplus.tdd.mvc;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.UserPoint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/point")
@@ -28,9 +30,6 @@ public class PointController {
         return pointService.get(id);
     }
 
-    /**
-     * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
-     */
     @GetMapping("{id}/histories")
     public List<PointHistory> history(
             @PathVariable long id
@@ -41,42 +40,32 @@ public class PointController {
     @PatchMapping("{id}/charge")
     public UserPoint charge(
             @PathVariable long id,
-            @RequestBody long amount
+            @RequestBody Amount amount
     ) {
-        return pointService.charge(id, amount);
+        return pointService.charge(id, amount.getValue());
     }
 
     @PatchMapping("{id}/use")
     public UserPoint use(
             @PathVariable long id,
-            @RequestBody long amount
+            @RequestBody Amount amount
     ) {
-        return pointService.use(id, amount);
+        return pointService.use(id, amount.getValue());
     }
 
-    @PostMapping("check-amount")
-    public ResponseEntity<Map<String, Object>> charge(
-            @RequestParam Long userId,
-            @RequestBody ChargeRequest request
-    ) {
-        // 유효하지 않은 금액 처리 (ex. 10,000 이상이면 실패)
-        if (request.amount() >= 10000) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    Map.of(
-                            "code", 500,
-                            "message", "홍길동fail"
-                    )
-            );
+
+    @NoArgsConstructor
+    public static class Amount {
+
+        @Getter
+        private long value;
+
+        @JsonCreator
+        public Amount(
+                @JsonProperty("amount") long value
+        ) {
+            this.value = value;
         }
-
-        // 성공 응답 예시 (실제로는 비즈니스 로직 처리 필요)
-        return ResponseEntity.ok(
-                Map.of(
-                        "code", 200,
-                        "message", "홍길동success"
-                )
-        );
     }
 
-    public record ChargeRequest(String accountNo, int amount) {}
 }

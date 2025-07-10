@@ -17,14 +17,14 @@ class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = PointException.class)
     public ResponseEntity<ErrorResponse> handlePointException(PointException e) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return ResponseEntity.status(status).body(new ErrorResponse(status.value() + "", e.getMessage()));
+        System.out.println(e.getLog());
+        return ResponseEntity.status(e.getHttpStatus()).body(new ErrorResponse(e.getHttpStatusValue(), e.getErrorName()));
     }
 
     @ExceptionHandler(value = OrderException.class)
     public ResponseEntity<ErrorResponse> handleOrderException(OrderException e) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        return ResponseEntity.status(status).body(new ErrorResponse(status.value() + "", e.getMessage()));
+        System.out.println(e.getLog());
+        return ResponseEntity.status(e.getHttpStatus()).body(new ErrorResponse(e.getHttpStatusValue(), e.getErrorName()));
     }
 
 }

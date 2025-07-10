@@ -5,10 +5,12 @@ import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.order.IdempotentOrderExecutor;
 import io.hhplus.tdd.order.PointOrder;
 import io.hhplus.tdd.point.PointHistory;
+import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class IndempotentPointService implements PointService {
     @Override
     public UserPoint charge(long id, long amount) {
 
-        PointOrder pointOrder = new PointOrder(id, amount);
+        PointOrder pointOrder = new PointOrder(id, amount, TransactionType.CHARGE, Instant.now());
 
         return orderExecutor.executeWithLock(pointOrder, () -> {
             UserPoint existing = userPointTable.selectById(id);
@@ -53,14 +55,14 @@ public class IndempotentPointService implements PointService {
     @Override
     public UserPoint use(long id, long amount) {
 
-        PointOrder pointOrder = new PointOrder(id, amount);
+        PointOrder pointOrder = new PointOrder(id, amount, TransactionType.USE, Instant.now());
 
         return orderExecutor.executeWithLock(pointOrder, () -> {
             UserPoint existing = userPointTable.selectById(id);
-            long totalPoint = existing.use(amount).point();
+            UserPoint result = existing.use(amount);
 
             pointHistoryTable.insert(id, amount, USE, System.currentTimeMillis());
-            return userPointTable.insertOrUpdate(id, totalPoint);
+            return userPointTable.insertOrUpdate(id, result.point());
         });
 
     }

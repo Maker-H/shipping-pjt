@@ -1,8 +1,13 @@
-[
-  {
-    "key": "charge_success",
 
-    "fixtures": [
+
+
+
+[
+
+  {
+    "key": "CHARGE_AMOUNT_TOO_LOW",
+
+    "tables": [
       {
         "table": "userPoints",
         "rows": [
@@ -17,26 +22,27 @@
       }
     ],
 
-    "queriesDescription": { "userId": "사용자id" },
+    "pathParamsDescription": {
+      "id": "사용자id"
+    },
+
     "bodyDescription": {
-      "accountNo": "계좌",
-      "amount": "포인트"
+      "amount": "사용/충전 포인트"
     },
-    "queries": { "userId": 1 },
+
+    "pathParams": {
+      "id": "1"
+    },
+
     "body": {
-      "accountNo": "1",
       "amount": 0
-    },
-    "response": {
-      "code": 200,
-      "message": "홍길동sucess"
     }
   },
 
   {
-    "key": "charge_fail_invalid_amount",
+    "key": "USE_AMOUNT_TOO_LOW",
 
-    "fixtures": [
+    "tables": [
       {
         "table": "userPoints",
         "rows": [
@@ -51,19 +57,91 @@
       }
     ],
 
-    "queriesDescription": { "userId": "사용자id" },
+    "pathParamsDescription": {
+      "id": "사용자id"
+    },
+
     "bodyDescription": {
-      "accountNo": "계좌",
-      "amount": "포인트"
+      "amount": "사용/충전 포인트"
     },
-    "queries": { "userId": 2 },
+
+    "pathParams": {
+      "id": "1"
+    },
+
     "body": {
-      "accountNo": "1234567890",
-      "amount": 10000
+      "amount": 0
+    }
+  },
+
+
+  {
+    "key": "USE_AMOUNT_TOO_MUCH",
+
+    "tables": [
+      {
+        "table": "userPoints",
+        "rows": [
+          { "id": 1, "amount": 100 }
+        ]
+      },
+      {
+        "table": "pointHistories",
+        "rows": [
+          { "id": 1, "type": "CHARGE", "amount": 100, "updateMillis": 1 }
+        ]
+      }
+    ],
+
+    "pathParamsDescription": {
+      "id": "사용자id"
     },
-    "response": {
-      "code": 500,
-      "message": "홍길동fail"
+
+    "bodyDescription": {
+      "amount": "사용/충전 포인트"
+    },
+
+    "pathParams": {
+      "id": "1"
+    },
+
+    "body": {
+      "amount": 101
+    }
+  },
+
+  {
+    "key": "ALREADY_ORDERED",
+
+    "tables": [
+      {
+        "table": "userPoints",
+        "rows": [
+          { "id": 1, "amount": 100 }
+        ]
+      },
+      {
+        "table": "pointHistories",
+        "rows": [
+          { "id": 1, "type": "CHARGE", "amount": 100, "updateMillis": 1 }
+        ]
+      }
+    ],
+
+    "pathParamsDescription": {
+      "id": "사용자id"
+    },
+
+    "bodyDescription": {
+      "amount": "사용/충전 포인트"
+    },
+
+    "pathParams": {
+      "id": "1"
+    },
+
+    "body": {
+      "amount": 1
     }
   }
 ]
