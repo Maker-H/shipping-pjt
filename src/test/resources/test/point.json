@@ -1,12 +1,28 @@
 [
   {
     "key": "charge_success",
+
+    "fixtures": [
+      {
+        "table": "userPoints",
+        "rows": [
+          { "id": 1, "amount": 100 }
+        ]
+      },
+      {
+        "table": "pointHistories",
+        "rows": [
+          { "id": 1, "type": "CHARGE", "amount": 100, "updateMillis": 1 }
+        ]
+      }
+    ],
+
     "queriesDescription": { "userId": "사용자id" },
-    "queries": { "userId": 1 },
     "bodyDescription": {
       "accountNo": "계좌",
       "amount": "포인트"
     },
+    "queries": { "userId": 1 },
     "body": {
       "accountNo": "1",
       "amount": 0
@@ -19,6 +35,22 @@
 
   {
     "key": "charge_fail_invalid_amount",
+
+    "fixtures": [
+      {
+        "table": "userPoints",
+        "rows": [
+          { "id": 1, "amount": 100 }
+        ]
+      },
+      {
+        "table": "pointHistories",
+        "rows": [
+          { "id": 1, "type": "CHARGE", "amount": 100, "updateMillis": 1 }
+        ]
+      }
+    ],
+
     "queriesDescription": { "userId": "사용자id" },
     "bodyDescription": {
       "accountNo": "계좌",

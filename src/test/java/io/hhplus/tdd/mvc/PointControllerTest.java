@@ -1,6 +1,6 @@
 package io.hhplus.tdd.mvc;
 
-import io.hhplus.tdd.common.LoadJsonScenarios;
+import io.hhplus.tdd.common.LoadScenarios;
 import io.hhplus.tdd.common.Scenario;
 import io.hhplus.tdd.common.ScenarioKey;
 import io.restassured.RestAssured;
@@ -40,7 +40,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 
 @Profile("test")
 @ActiveProfiles("test")
-@LoadJsonScenarios("/test/point.json")
+@LoadScenarios("/test/point.json")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureRestDocs(uriHost = "api.99", uriPort = 80)
@@ -51,6 +51,10 @@ public class PointControllerTest {
     @Test
     @ScenarioKey("charge_success")
     void test(Scenario scenario) {
+
+        scenario.tables().forEach(t -> {
+            System.out.println(t.getTableName());
+        });
 
         RestAssured.given(this.spec)
                 .filter(document(scenario.key(), scenario.asQuerySnippet(), scenario.asRequestSnippet()))

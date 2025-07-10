@@ -1,5 +1,7 @@
 package io.hhplus.tdd.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.restdocs.request.ParameterDescriptor;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 public record Scenario(
     String key,
+    List<Table> tables,
     Map<String, String> pathParamsDescription,
     Map<String, String> queriesDescription,
     Map<String, String> bodyDescription,
@@ -24,6 +27,7 @@ public record Scenario(
         if (key == null) {
             throw new IllegalArgumentException("Scenario must have a 'key' field");
         }
+
         if (pathParams != null && pathParams.size() != pathParamsDescription.size()) {
             throw new IllegalArgumentException(resourceName + "/Scenario : " + key + " mismatched sizes between pathParams and pathParamsDescription");
         }
@@ -36,7 +40,7 @@ public record Scenario(
     }
 
     public Scenario toScenario() {
-        return new Scenario(key, pathParamsDescription, queriesDescription, bodyDescription, pathParams, queries, body, response);
+        return new Scenario(key, tables, pathParamsDescription, queriesDescription, bodyDescription, pathParams, queries, body, response);
     }
 
     public Snippet asPathSnippet() {
@@ -69,5 +73,25 @@ public record Scenario(
                 .toList();
 
         return PayloadDocumentation.requestFields(fieldDescriptors);
+    }
+
+    public static class Table {
+        private final String tableName;
+        private final List<Map<String, Object>> rows;
+
+        @JsonCreator
+        public Table(@JsonProperty("table") String tableName,
+                     @JsonProperty("rows") List<Map<String, Object>> rows) {
+            this.tableName = tableName;
+            this.rows = rows;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
+        public List<Map<String, Object>> getRows() {
+            return rows;
+        }
     }
 }
