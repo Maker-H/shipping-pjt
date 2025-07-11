@@ -1,0 +1,48 @@
+[
+  {
+    "key": "CHARGE_AMOUNT_TOO_LOW",
+
+    "fixtures": [
+      {
+        "table": "userPoints",
+        "rows": [
+          { "id": 1, "amount": 100 }
+        ]
+      },
+      {
+        "table": "pointHistories",
+        "rows": [
+          { "id": 1, "type": "CHARGE", "amount": 100, "updateMillis": 1 }
+        ]
+      }
+    ],
+
+
+    "pathParamsDescription": {
+      "id": "사용자id"
+    },
+    "queriesDescription": {
+      "id": "사용자id"
+    },
+    "bodyDescription": {
+      "accountNo": "계좌",
+      "amount": "포인트"
+    },
+
+    "pathParams": {
+      "id": "사용자id"
+    },
+    "queries": {
+      "id": 1
+    },
+    "body": {
+      "accountNo": "1",
+      "amount": 0
+    },
+
+    "response": {
+      "code": 200,
+      "message": "홍길동sucess"
+    }
+  }
+]
