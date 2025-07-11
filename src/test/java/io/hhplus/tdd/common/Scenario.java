@@ -22,10 +22,8 @@ import org.springframework.restdocs.snippet.Snippet;
 import org.springframework.web.servlet.function.RequestPredicate;
 import org.springframework.web.servlet.function.RequestPredicates;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.springframework.web.servlet.function.RequestPredicates.path;
@@ -44,19 +42,55 @@ public record Scenario(
 ) {
 
     public void validate(String resourceName) {
+
         if (key == null) {
             throw new IllegalArgumentException("Scenario must have a 'key' field");
         }
 
-        if (pathParams != null && pathParams.size() != pathParamsDescription.size()) {
-            throw new IllegalArgumentException(resourceName + "/Scenario : " + key + " mismatched sizes between pathParams and pathParamsDescription");
+        if (pathParams != null) {
+            if (pathParams.size() != pathParamsDescription.size()) {
+                throw new IllegalArgumentException("[fileName:" + resourceName + "] [Scenario:" + key + "] mismatched sizes between pathParams and pathParamsDescription");
+            }
+            validateHasSameKeys(resourceName, pathParams, pathParamsDescription);
         }
-        if (queries != null && queries.size() != queriesDescription.size()) {
-            throw new IllegalArgumentException(resourceName + "/Scenario : " + key + " mismatched sizes between queries and queriesDescription");
+
+
+        if (queries != null) {
+            if (queries.size() != queriesDescription.size()) {
+                throw new IllegalArgumentException("[fileName:" + resourceName + "] [Scenario:" + key + "] mismatched sizes between queries and queriesDescription");
+            }
+            validateHasSameKeys(resourceName, queries, queriesDescription);
         }
-        if (body != null && body.size() != bodyDescription.size()) {
-            throw new IllegalArgumentException(resourceName + "/Scenario : " + key + " mismatched sizes between body and bodyDescription");
+
+
+        if (body != null) {
+            if (body.size() != bodyDescription.size()) {
+                throw new IllegalArgumentException("[fileName:" + resourceName + "] [Scenario:" + key + "] mismatched sizes between body and bodyDescription");
+            }
+            validateHasSameKeys(resourceName, body, bodyDescription);
         }
+
+
+        if (response != null) {
+            if (response.size() != responseDescription.size()) {
+                throw new IllegalArgumentException("[fileName:" + resourceName + "] [Scenario:" + key + "] mismatched sizes between response and responseDescription");
+            }
+            validateHasSameKeys(resourceName, response, responseDescription);
+        }
+
+    }
+
+    private void validateHasSameKeys(String resourceName, Map<String, Object> sourceMap, Map<String, String> descriptionMap) {
+        String[] sourceArray = sourceMap.keySet().stream().toArray(String[]::new);
+        String[] descriptionArray = descriptionMap.keySet().stream().toArray(String[]::new);
+
+        Arrays.sort(sourceArray);
+        Arrays.sort(descriptionArray);
+        IntStream.range(0, sourceArray.length).forEach(i -> {
+            if (!sourceArray[i].equals(descriptionArray[i])) {
+                throw new IllegalArgumentException("[fileName:" + resourceName + "] [Scenario:" + key + "] [sourceKey:" + sourceArray[i] + "] [descriptionKey:" + descriptionArray[i] + "] mismatch");
+            }
+        });
     }
 
     public Scenario toScenario() {
@@ -151,7 +185,7 @@ public record Scenario(
                 try {
                     actualMap = mapper.readValue((String) actual, new TypeReference<>(){});
                 } catch (JsonProcessingException e) {
-                    throw new IllegalArgumentException("wrong format.");
+                    throw new IllegalArgumentException("wrong format of response in json file");
                 }
 
                 for (Map.Entry<String, Object> expected : this.response.entrySet()) {

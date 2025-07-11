@@ -28,7 +28,10 @@
       "accountNo": "계좌",
       "amount": "포인트"
     },
-
+    "responseDescription": {
+      "code": "http 상태코드",
+      "message": "반환 메시지"
+    },
     "pathParams": {
       "id": "사용자id"
     },
