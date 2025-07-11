@@ -36,6 +36,7 @@ public class ScenarioInjectionExtension implements BeforeAllCallback, BeforeEach
 
     static {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.USE_LONG_FOR_INTS, true);
     }
 
     @Override
@@ -119,25 +120,20 @@ public class ScenarioInjectionExtension implements BeforeAllCallback, BeforeEach
 
             if (tableName.equals("userPoints")) {
                 for (Map<String, Object> row : rows) {
-                    Integer id = (Integer) row.get("id");
-                    Integer amount = (Integer) row.get("amount");
-                    userPointTable.insertOrUpdate(id.longValue(), amount.longValue());
+                    userPointTable.insertOrUpdate(
+                            (Long) row.get("id"),
+                            (Long) row.get("amount")
+                    );
                 }
             }
 
             if (tableName.equals("pointHistories")) {
                 for (Map<String, Object> row : rows) {
-
-                    Integer id = (Integer) row.get("id");
-                    Integer value = (Integer) row.get("amount");
-                    TransactionType type = TransactionType.from((String) row.get("type"));
-                    Integer updateMillis = (Integer) row.get("updateMillis");
-
                     pointHistoryTable.insert(
-                            id.longValue(),
-                            value.longValue(),
-                            type,
-                            updateMillis.longValue()
+                            (Long) row.get("id"),
+                            (Long) row.get("amount"),
+                            TransactionType.from((String) row.get("type")),
+                            (Long) row.get("updateMillis")
                     );
                 }
             }

@@ -7,6 +7,7 @@ import io.hhplus.tdd.common.ScenarioKey;
 import io.hhplus.tdd.order.OrderException;
 import io.hhplus.tdd.point.PointException;
 import io.restassured.http.ContentType;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Profile;
@@ -127,4 +128,33 @@ public class PointControllerTest extends AcceptanceTest {
                 .statusCode(errorType.getHttpStatus().value())
                 .body("message", equalTo(errorType.name()));
     }
+
+
+    @Test
+    @ScenarioKey("CHARGE_SUCCESS")
+    @DisplayName("포인트 충전 - 성공")
+    void 포인트_충전_성공(Scenario scenario) {
+
+
+        given(getSpec())
+                .filter(document(scenario.key(), scenario.asPathSnippet(), scenario.asBodySnippet()))
+                .contentType(ContentType.JSON)
+                .body(scenario.body())
+                .log().all()
+                .when()
+                .patch("/point/{id}/charge", scenario.pathParams())
+                .then()
+                .log().all()
+                .statusCode(200)
+                .body(scenario.asResponseMatcher());
+
+//                .body(
+//                        "id", Matchers.equalTo(scenario.response().get("id")),
+//                        "id", Matchers.equalTo(scenario.response().get("id"))
+//                );
+
+//                .body("message", equalTo(scenario.response().message()));
+
+    }
+
 }
