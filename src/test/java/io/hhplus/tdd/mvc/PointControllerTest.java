@@ -7,7 +7,6 @@ import io.hhplus.tdd.common.ScenarioKey;
 import io.hhplus.tdd.order.OrderException;
 import io.hhplus.tdd.point.PointException;
 import io.restassured.http.ContentType;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Profile;
@@ -31,7 +30,10 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 
 @Profile("test")
 @ActiveProfiles("test")
-@LoadScenarios("/test/point.json")
+@LoadScenarios(
+        json = {"/test/point.json"},
+        sql = {"/test/example.json"}
+)
 @DisplayName("포인트 관련 인수 테스트")
 public class PointControllerTest extends AcceptanceTest {
 

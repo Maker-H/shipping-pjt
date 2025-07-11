@@ -31,6 +31,9 @@ dependencyManagement {
 
 dependencies {
     implementation(libs.spring.boot.starter.web)
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+
+    runtimeOnly("com.h2database:h2")
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

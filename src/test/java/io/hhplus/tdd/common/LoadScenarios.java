@@ -20,5 +20,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(ScenarioInjectionExtension.class)
 public @interface LoadScenarios {
-    String value();
+
+    String[] json();
+
+    String[] sql() default {};
+
 }
